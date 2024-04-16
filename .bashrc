@@ -129,6 +129,7 @@ export PATH="$HOME/go/bin:$PATH"
 
 alias vi="nvim"
 alias vim="nvim"
+alias lg="lazygit"
 
 bind -x '"\C-f":"~/.local/scripts/tmux-sessionizer"'
 
