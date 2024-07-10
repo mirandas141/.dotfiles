@@ -122,10 +122,24 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-export PATH="/usr/local/go/bin:$PATH"
-export PATH="$HOME/neovim/bin:$PATH"
-export PATH="$HOME/.local/bin:$PATH"
-export PATH="$HOME/go/bin:$PATH"
+addToPath() {
+    if [[ "$PATH" != *"$1"* ]]; then
+	export PATH=$PATH:$1
+    fi
+}
+
+addToPathFront() {
+    if [[ "$PATH" != *"$1"* ]]; then
+	export PATH=$1:$PATH
+    fi
+}
+
+addToPathFront /usr/local/go/bin
+addToPathFront $HOME/neovim/bin
+addToPathFront $HOME/.local/bin
+addToPath $HOME/go/bin
+addToPath $HOME/.zig
+addToPathFront $HOME/.fzf
 
 alias vi="nvim"
 alias vim="nvim"
@@ -135,7 +149,19 @@ bind -x '"\C-f":"~/.local/scripts/tmux-sessionizer"'
 
 eval "$(zoxide init --cmd cd bash)"
 
-[ -f ~/.fzf.bash ] && source ~/.fzf.bash
+#[ -f ~/.fzf.bash ] && source ~/.fzf.bash
+eval "$(fzf --bash)"
+_fzf_comprun() {
+  local command=$1
+  shift
+
+  case "$command" in
+    cd)           fzf --preview 'tree -C {} | head -200'   "$@" ;;
+    export|unset) fzf --preview "eval 'echo \$'{}"         "$@" ;;
+    ssh)          fzf --preview 'dig {}'                   "$@" ;;
+    *)            fzf --preview 'bat -n --color=always {}' "$@" ;;
+  esac
+}
 
 if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then
     tmux new -As0
